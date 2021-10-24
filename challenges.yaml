@@ -1,0 +1,15 @@
+- name: test1
+  difficulty: 1
+  count: 1
+- name: test2
+  difficulty: 1
+  count: 2
+- name: easy
+  difficulty: 3
+  count: 10
+- name: medium
+  difficulty: 5
+  count: 5
+- name: hard
+  difficulty: 8
+  count: 1
