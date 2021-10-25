@@ -13,15 +13,15 @@ You can use it as a sandbox to learn about the following things:
 
 *The evil Doctor Hash has locked you and your team in the basement of their evil lair. The basement door is locked with a code. The only way to exit the basement and escape the lair is to crack the code!*
 
-*There is just one slight little problem: the door code is a 15-digit number. That's way too many possibilities to try them all manually! Fortunately, you have some extra information about the code. Here is the message the was left by one of your spies.*
+*There is just one slight little problem: the door code is a 15-digit number. That's way too many possibilities to try them all manually! Fortunately, you have some extra information about the door code. Here is the message the was left by one of your spies.*
 
-> *“Alright, I don't have the code quite yet, and when I have it, I will leave it in the basement. Except if I just write down the code, the evil cleaning robots will find it and destroy it; so I need to make it look like something else. Here is what I will do: I will split the code into 5 chunks of 3 digits each. Then I will compute a salted hash of each chunk, and leave these hashes in plain sight. The cleaning robots will think that it's some important research information and leave it here. The salt will be our team name, followed by a dot, and we will also add a carriage return after the number when computing the hash.”*
+> *“Alright, I don't have the door code quite yet, and when I have it, I will leave it in the basement. Except if I just write down the door code, the evil cleaning robots will find it and destroy it; so I need to make it look like something else. Here is what I will do: I will split the door code into 5 chunks of 3 digits each. Then I will compute a salted hash of each chunk, and leave these hashes in plain sight. The cleaning robots will think that it's some important research information and leave it here. The salt will be our team name, followed by a dot, and we will also add a carriage return after the number when computing the hash.”*
 
 *Since these instructions were a bit confusing, we asked the agent to send us an example.*
 
-> *“Imagine that the code is 123456789444222, then the chunks will be 123 456 789 444 222. If our team name is `"rainbow"`, I will compute the SHA256 hash of `"rainbow.123\n"`, then of `"rainbow.456\n"`, and so on. I'm going to send you a little snippet of code to show exactly what I mean.”*
+> *“Imagine that the door code is 123456789444222, then the chunks will be 123 456 789 444 222. If our team name is `"rainbow"`, I will compute the SHA256 hash of `"rainbow.123\n"`, then of `"rainbow.456\n"`, and so on. I'm going to send you a little shell snippet to show exactly what I mean.”*
 
-*And here is the code:*
+*And here is the shell snippet:*
 
 ```bash
 for CHUNK in 123 456 789 444 222; do
