@@ -1,29 +1,70 @@
 # Escape Hash
 
-Escape Hash is a little programming challenge to illustrate how to run jobs of various sizes, for instance:
+Escape Hash is a (relatively simple) programming challenge that can be used to illustrate, or learn about, multiple concepts.
 
-- small jobs (a few seconds or less) that can be placed behind an API gateway
-- bigger jobs (from a minute to a few hours) that can leverage a job scheduler (e.g. Kubernetes "Job" resources)
+You can use it as a sandbox to learn about the following things:
+- difference of speed between shell scripts and Python scripts;
+- executing code directly vs. putting it behind an API gateway vs. executing it via a work queue;
+- space/time complexity trade-offs;
+- scaling code for performance;
+- latency and prioritization.
 
-Escape Hash is an API server. Through that API, you can ask "challenges" (problems to solve) and submit challenge answers for validation.
+## Gettting psyched
 
-In concrete terms, the challenges are hashes, and you must reverse the hash. This is CPU-intensive, and the amount of work to solve a challenge is easily adjustable.
+*The evil Doctor Hash has locked you and your team in the basement of their evil lair. The basement door is locked with a code. The only way to exit the basement and escape the lair is to crack the code!*
 
-When communicating with the API server, almost every API call specifies a "team". The "team" is used as a seed to generate the challenges, so that every team will have different challenges.
+*There is just one slight little problem: the door code is a 15-digit number. That's way too many possibilities to try them all manually! Fortunately, you have some extra information about the code. Here is the message the was left by one of your spies.*
 
-## Challenges and answers
+> *“Alright, I don't have the code quite yet, and when I have it, I will leave it in the basement. Except if I just write down the code, the evil cleaning robots will find it and destroy it; so I need to make it look like something else. Here is what I will do: I will split the code into 5 chunks of 3 digits each. Then I will compute a salted hash of each chunk, and leave these hashes in plain sight. The cleaning robots will think that it's some important research information and leave it here. The salt will be our team name, followed by a dot, and we will also add a carriage return after the number when computing the hash.”*
+
+*Since these instructions were a bit confusing, we asked the agent to send us an example.*
+
+> *“Imagine that the code is 123456789444222, then the chunks will be 123 456 789 444 222. If our team name is `"rainbow"`, I will compute the SHA256 hash of `"rainbow.123\n"`, then of `"rainbow.456\n"`, and so on. I'm going to send you a little snippet of code to show exactly what I mean.”*
+
+*And here is the code:*
+
+```bash
+for CHUNK in 123 456 789 444 222; do
+  echo rainbow.$CHUNK | sha256sum
+done
+```
+
+*And the five hashes corresponding to the five chunks would then be:*
+
+```
+a60674cb65abb648bd8767590ee38d5770105faa5151cce0e8d1c8673357ca2f
+946b2be63d7e57cc16f3c99c63da87f724e0c9575bd7b8fcca3dc0c3c1d8d276
+1c8f9f96a75ce641bc6a744c7bc75beeda2c0bc6e951a76fb2745750398f5cda
+dd1bba54d476eebaa54e2baf03c3296cddadec18b92531606a52ccbc71a054f8
+79c39c1edfd80397ba81fbf68d5204e56f7c1ad1b71cc5b68c9de1c0e5184aab
+```
+
+*Now you're in the basement. We'll tell you how to get these hashes, and all you'll have to do is find out the numbers behind them, and then you'll be able to escape the basement of the evil lair before Doctor Hash blows everything up! (Why do evil Doctors always want to blow everything up anyway?)*
+
+## Getting started
+
+Escape Hash is an API server. Through that API, you can ask "challenges" and submit "solutions" for validation.
+
+The "challenges" are list of hashes.
+
+The "solutions" are big numbers (long strings of digits).
+
+When communicating with the API server, almost every API call specifies a "team". The "team" is used as a seed to generate the challenges, so that every team will have different challenges. (In the intro story, the team name was `rainbow`.)
 
 Each challenge has a *difficulty* and a *count*.
 
-The *count* indicates how many hashes there are in the challenge; and the *difficulty* indicates the size of the number used to generate the hash.
+The *difficulty* indicates how many digits there are in each chunk of the challenge. (In the intro story, the difficulty was 3.)
 
-Each hash is the SHA256 checksum (in hex digest form) of:
+Note: the chunks can't actually start with zeroes, so if difficulty=3, it means that each chunk is a number between 100 and 999 (both included).
 
-`team name` + `random number` + `\n`.
+The *count* indicates how many chunks there are in the challenge. (In the intro story, the count was 5.)
 
-Each random number has N digits, where N is the difficulty of the challenge, and it cannot start with zeros. So for instance, for difficulty 3, the random number can go from 100 to 999.
+As a reminder, each hash is calculated by taking the SHA256 checksum (in hex digest form) of:
 
-So in a challenge with `difficulty=5` and `count=2`, the random numbers could be `12345` and `42420`. For team `purple`, the hashes would be shown by the commands below:
+`team name` + `.` + `random number` + `\n`.
+
+
+Example: let's say that a challenge has `difficulty=5` and `count=2`. The final code will be 5x2=10 digits. If the final code is `1234542420`, the chunks would be `12345` and `42420`. For team `purple`, the hashes would be shown by the commands below:
 
 ```bash
 $ echo purple.12345 |sha256sum 
@@ -32,7 +73,12 @@ $ echo purple.42420 | sha256sum
 0c38eb462addee5d0270e0990f96778715bf57a39a51fc157f76caba1f7766b4  -
 ```
 
-The answer that must be submitted to the API server is the concatenation of all the numbers. In the example above, that would be `1234542420`.
+So the steps are:
+
+1. Obtain the list of hash from the API server.
+2. Guess (probably by brute force) which numbers were used to generate each hash.
+3. Concatenate all these numbers to reconstruct the original code.
+4. Submit the code to the API server for validation.
 
 
 ## Example

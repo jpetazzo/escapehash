@@ -4,12 +4,15 @@
 - name: test2
   difficulty: 1
   count: 2
-- name: easy
-  difficulty: 3
-  count: 10
-- name: medium
-  difficulty: 5
-  count: 5
-- name: hard
-  difficulty: 8
+- name: test3
+  difficulty: 2
   count: 1
+- name: test4
+  difficulty: 2
+  count: 2
+- name: basement_door
+  difficulty: 3
+  count: 5
+- name: treasure_vault
+  difficulty: 5
+  count: 3

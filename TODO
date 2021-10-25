@@ -1,0 +1,7 @@
+
+- space/time complexity: build a cache that uses RAM
+- see how fast a C version would be
+- next step: put the solver behind an API gateway
+  (time it so that it takes about 1 sec?)
+- put that in a loop, check how fast it works, show latency
+- show how to do it with a message queue?

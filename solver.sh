@@ -1,30 +1,51 @@
 #!/bin/sh
+
+[ "$TEAM" ] || {
+    echo "TEAM environment variable not set; using default value 'rainbow'."
+    TEAM=rainbow
+}
+
+[ "$SERVER" ] || {
+    echo "SERVER environment variable not set; using default value 'localhost:5000'."
+    SERVER=localhost:5000
+}
+
 set -eu
 
-TEAM=$1
-CHALLENGE=$2
-DIFFICULTY=$3
-SERVER=$4
-
-LOW=$((10**($DIFFICULTY-1)))
-HIGH=$((10**$DIFFICULTY))
-
-SOLUTION=""
-
-for HASH in $(curl -fs http://$SERVER/v1/team/$TEAM/challenge/$CHALLENGE.txt); do
-    echo "$HASH"
-    THISHASH=FAIL
+solve_hash() {
+    HASH=$1
+    DIFFICULTY=$2
+    LOW=$((10**($DIFFICULTY-1)))
+    HIGH=$((10**$DIFFICULTY))
     for I in $(seq $LOW $HIGH); do
         TRYHASH=$(echo "$TEAM.$I" | sha256sum | awk '{print $1}')
         if [ "$TRYHASH" = "$HASH" ]; then
-            THISHASH=$I
-            SOLUTION=$SOLUTION$I
+            echo $I
+            return
         fi
     done
-    echo "$THISHASH"
-    if [ "$THISHASH" = "FAIL" ]; then
-        exit 1
-    fi
-done
+    echo "Failed to solve hash $HASH."
+    exit 1
+}
 
-echo $SOLUTION
+solve_challenge() {
+    CHALLENGE=$1
+    DIFFICULTY=$2
+    SOLUTION=""
+    for HASH in $(curl -fs $SERVER/v1/team/$TEAM/challenge/$CHALLENGE.txt); do
+        SOLUTION=$SOLUTION$(solve_hash $HASH $DIFFICULTY)
+    done
+    echo $SOLUTION
+}
+
+solve_all() {
+    curl -fs localhost:5000/v1/challenges \
+    | jq -r '.[] | [ .name, .difficulty ] | @tsv' \
+    | while read CHALLENGE DIFFICULTY ; do
+        echo "Solving challenge $CHALLENGE with difficulty $DIFFICULTY."
+        SOLUTION=$(solve_challenge $CHALLENGE $DIFFICULTY)
+        curl -fs $SERVER/v1/team/$TEAM/challenge/$CHALLENGE -H content-type:text/plain --data $SOLUTION
+    done
+}
+
+solve_all
