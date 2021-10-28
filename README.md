@@ -178,8 +178,8 @@ Using the list we got above, the first one corresponds to `3` and the second one
 So we submit `39`:
 
 ```bash
-curl localhost:5000/v1/team/purple/challenge/test1 \
-     -H content-type:text/plain --data 9
+curl localhost:5000/v1/team/purple/challenge/test2 \
+     -H content-type:text/plain --data 39
 ```
 
 And we get the `Well done!` message again.
